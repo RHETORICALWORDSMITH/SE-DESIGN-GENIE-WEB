@@ -1,5 +1,5 @@
-import React, { createContext, useState, useContext } from "react";
-
+import { createContext, useState, useContext } from "react";
+// import PropTypes from "prop-types";
 // Creating context
 export const AuthContext = createContext();
 
@@ -11,9 +11,9 @@ const AuthProvider = ({ children }) => {
   );
 
   return (
-    <AuthContext.Provider value={[authUser, setAuthUser]}>
+    <AuthContext value={[authUser, setAuthUser]}>
       {children}
-    </AuthContext.Provider>
+    </AuthContext>
   );
 };
 
@@ -25,5 +25,9 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// AuthProvider.propTypes = {
+//   children: PropTypes.node.isRequired, // Ensure 'children' is passed and is valid
+// };
 
 export default AuthProvider;

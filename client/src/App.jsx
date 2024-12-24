@@ -5,9 +5,11 @@ import Home from "./components/Home";
 import Footer from "./components/Footer";
 import { Routes, Route } from "react-router-dom";
 import { useAuth } from "./context/AuthProvider";
+import { Navigate } from "react-router-dom";
+
 
 function App() {
-  const [authUser, setAuthUser] = useAuth();
+  const [authUser] = useAuth();
   return (
     <>
       <Navbar />

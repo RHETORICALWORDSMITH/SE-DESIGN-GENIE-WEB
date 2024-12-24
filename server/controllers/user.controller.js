@@ -5,6 +5,7 @@ export const signUp = async (req, res) => {
   console.log("itworks");
 
   try {
+    console.log("This is the try block");
     const { name, email, password } = req.body;
 
     // Check if the user already exists

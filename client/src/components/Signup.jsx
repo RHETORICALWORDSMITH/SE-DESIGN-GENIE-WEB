@@ -1,142 +1,162 @@
-import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom"; // Import the useNavigate hook
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { emailTransfer } from "../redux/counter/transferEmailSlice.js";
 
-const SignUp = () => {
-  // Use React Hook Form to handle form state and validation
+const Signup = () => {
+
+  //redux
+  const dispatch = useDispatch();
+
+  const location = useLocation();
+  const to = location.state?.from || "/";
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const navigate = useNavigate(); // Initialize the navigate hook for navigation
-
-  // Form submission handler
   const onSubmit = async (data) => {
-    console.log(data);
-    const userInfo = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    };
+    toast.success("Verifying your email address!");
+    //this is email Validation api key It  is for verification if email exists only then it will be dispatched
+    let key = "ema_live_zaab08z8UzLPghvDdlXN71UubJXAfHWnxQJ6pn6I";
+    let email = data.email;
+    let url = `https://api.emailvalidation.io/v1/info?apikey=${key}&email=${email}`;
+    let res = await fetch(url); // axios can not used in here
+    let apiData = await res.json(); // return an object in which form-valid tells if the email exists or not.
+    // console.log(apiData);
+    
+    if (apiData.format_valid === true) {
+      dispatch(emailTransfer({ email: data.email })); // transfer email to redux store
 
-    try {
-      console.log("it is working");
-      const res = await axios.post(
-        "http://localhost:3000/user/signup",
-        userInfo
-      );
-      const resData = res.data;
-      console.log(resData);
-      if (resData) {
-        alert("Signup successful!");
-        localStorage.setItem("userInfo", JSON.stringify(res.data));
+      const userInfo = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      };
+
+      try {
+        const res = await axios.post(
+          "http://localhost:3000/user/signup",
+          userInfo
+        );
+        console.log(res.data);
+        if (res.data) {
+          toast.success("Signup successful!");
+          localStorage.setItem("userInfo", JSON.stringify(res.data));
+        }
+        setTimeout(() => {
+          window.location.replace(`http://localhost:5173${to}`); // to go back to the main page
+          //  navigate(from, {replace: true}); // import navigate hook to use this
+        }, 1000);
+      } catch (err) {
+        console.log(err);
+        toast.error("Signup failed user already exists!");
       }
-    } catch (err) {
-      console.log(err);
-      alert("Signup failed, user already exists!");
+    } else {
+      toast.error("Email is not valid!");
     }
-
-    // Redirect to the homepage after form submission
-    navigate("/"); // Navigate to the home page immediately after submission
   };
-
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-6">Sign Up</h2>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Username */}
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Username
-            </label>
+   <div className="flex h-screen bg-gray-900 items-center justify-center shadow-md">
+  <div className="w-[600px]">
+    <div className="modal-box bg-black text-white p-7 rounded-md">
+      <form method="dialog">
+        <Link
+          to="/"
+          className="btn btn-sm btn-circle btn-ghost absolute right-2 top-3"
+        >
+          X
+        </Link>
+      </form>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <h3 className="font-bold text-lg">Signup</h3>
+        {/* Name */}
+        <div className="mt-5 space-y-2">
+          <span>Name</span>
+          <br />
+          <div className="flex gap-3">
             <input
-              id="username"
               type="text"
-              {...register("username", { required: "Username is required" })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 rounded-md w-full my-2 text-white outline-none placeholder:text-white border-white bg-gray-800"
+              placeholder="Enter your full name"
+              {...register("name", {
+                required: true,
+                errors: "This field is required",
+              })}
             />
-            {errors.username && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.username.message}
-              </p>
+            {errors.name && (
+              <span className="text-pink-500">This field is required</span>
             )}
           </div>
-
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
+        </div>
+        {/* Email */}
+        <div className="mt-5 space-y-2">
+          <span>Email</span>
+          <br />
+          <div className="flex gap-3">
             <input
-              id="email"
               type="email"
+              className="p-2 rounded-md w-full my-2 text-white outline-none placeholder:text-white border-white bg-gray-800"
+              placeholder="Enter your Email"
               {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
-                },
+                required: true,
+                errors: "This field is required",
               })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {errors.email && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.email.message}
-              </p>
+              <span className="text-pink-500">This field is required</span>
             )}
           </div>
-
-          {/* Password */}
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
+        </div>
+        {/* Password */}
+        <div className="mt-5 space-y-2">
+          <span>Password</span>
+          <br />
+          <div className="flex gap-3">
             <input
-              id="password"
               type="password"
-              {...register("password", { required: "Password is required" })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 rounded-md w-full my-2 text-white outline-none placeholder:text-white border-white bg-gray-800"
+              placeholder="Enter your password"
+              {...register("password", {
+                required: true,
+                errors: "This field is required",
+              })}
             />
             {errors.password && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.password.message}
-              </p>
+              <span className="text-pink-500">This field is required</span>
             )}
           </div>
-
-          {/* Submit Button */}
-          <div>
-            {/* <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Sign Up
-            </button> */}
-            <Link to="/">
-              <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                Sign Up
-              </button>
-            </Link>
-          </div>
-        </form>
-      </div>
+        </div>
+        <div className="flex justify-around mt-6 items-center">
+          <button className="bg-pink-500 py-2 px-3 rounded-md text-black">
+            Signup
+          </button>
+          <p>
+            Have an account?{" "}
+            <span className="text-blue-500 underline cursor-pointer">
+              <Link
+                to="/"
+                onClick={() =>
+                  setTimeout(() => {
+                    document.getElementById("my_modal_2").showModal(); // Show the modal after navigation
+                  }, 100)
+                }
+              >
+                Login
+              </Link>
+            </span>
+          </p>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
+
   );
 };
 
-export default SignUp;
+export default Signup;

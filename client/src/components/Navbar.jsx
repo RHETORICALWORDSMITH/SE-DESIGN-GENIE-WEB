@@ -1,9 +1,10 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.jpeg";
-import account from "../assets/account.png";
-
-const Navabar = () => {
+import { useAuth } from "../context/AuthProvider";
+import Logout from "./Logout.jsx";
+import Login from "./Login.jsx";
+const Navbar = () => {
+   const [authUser] = useAuth();
   return (
     <>
       <div className="navbar bg-gray-600 text-white">
@@ -32,12 +33,12 @@ const Navabar = () => {
               <li>
                 <Link to="/">
                   <p className="text-xl font-semibold">Home</p>
-                </Link>{" "}
+                </Link>
               </li>
               <li>
                 <Link to="/design">
                   <p className="text-xl font-semibold">Generate</p>
-                </Link>{" "}
+                </Link>
               </li>
             </ul>
           </div>
@@ -51,23 +52,33 @@ const Navabar = () => {
             <li>
               <Link to="/">
                 <p className="text-xl font-semibold">Home</p>
-              </Link>{" "}
+              </Link>
             </li>
             <li>
               <Link to="/design">
                 <p className="text-xl font-semibold">Generate</p>
-              </Link>{" "}
+              </Link>
             </li>
           </ul>
         </div>
-        <div className="navbar-end">
-          <Link to="/signup">
-            <img className="w-16 rounded-full" src={account} alt="account" />
-          </Link>
+       
+        <div className="navbar-end ml-auto">
+         
+        {authUser ? (
+              <Logout />
+            ) : (
+              <div
+                onClick={() =>
+                  document.getElementById("my_modal_2").showModal()
+                }
+              >
+                <Login />
+              </div>
+            )}
         </div>
       </div>
     </>
   );
 };
 
-export default Navabar;
+export default Navbar;

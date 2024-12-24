@@ -1,92 +1,133 @@
-import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthProvider";
+import { useDispatch } from "react-redux";
+import { emailTransfer } from "../redux/counter/transferEmailSlice.js";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  //redux
+  const dispatch = useDispatch();
 
-  // Login handler
-  const handleLogin = async (event) => {
-    event.preventDefault();
+  const [authUser, setAuthUser] = useAuth();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-    if (!email.trim() || !password.trim()) {
-      setError("Both fields are required!");
-      return;
-    }
+  const onSubmit = async (data) => {
+    dispatch(emailTransfer({ email: data.email })); // transfer email to redux store
+    const userInfo = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    };
 
     try {
-      const res = await axios.post("http://localhost:3000/user/login", {
-        email,
-        password,
-      });
-
+      const res = await axios.post(
+        "http://localhost:3000/user/login",
+        userInfo
+      );
+      const resData = res.data;
+      console.log(res.data);
+      setAuthUser(resData);
       if (res.data) {
-        alert("Login successful!");
+        toast.success("Login successful!");
         localStorage.setItem("userInfo", JSON.stringify(res.data));
-        // Redirect or navigate to a different page after login
-        window.location.replace("/dashboard"); // Redirect to the dashboard or home page
       }
+      document.getElementById("my_modal_2").showModal();
     } catch (err) {
-      setError("Invalid credentials or login failed!");
+      console.log(err);
+      toast.error("Login failed!");
     }
   };
-
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-6">Login</h2>
+    <div>
+      <div>
+        {/* Open the modal using document.getElementById('ID').showModal() method */}
+        <button
+          className="btn bg-black text-white px-6 py-2 rounded-md hover:bg-slate-800 duration-300 cursor-pointer"
+          onClick={() => document.getElementById("my_modal_2").showModal()}
+        >
+          Login
+        </button>
+        <dialog id="my_modal_2" className="modal">
+          <div className="modal-box bg-white dark:bg-black dark:text-white p-7 rounded-md">
+            <form method="dialog">
+              <button
+                onClick={() =>
+                  document.getElementById("my_modal_2").showModal()
+                }
+                className="btn btn-sm btn-circle btn-ghost absolute right-2 top-3"
+              >
+                X
+              </button>
+            </form>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your email"
-            />
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <h3 className="font-bold text-lg">Login</h3>
+              {/* Email */}
+              <div className="mt-5 space-y-2">
+                <span>Email</span>
+                <br />
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    className="p-2 rounded-md w-full my-2 bg-white dark:bg-gray-800 text-black dark:text-white outline-none dark:placeholder:text-white placeholder:text-black  dark:border-white border-black border"
+                    placeholder="Enter your Email"
+                    {...register("email", {
+                      required: true,
+                      errors: "This field is required",
+                    })}
+                  />
+                  {errors.email && (
+                    <span className="text-pink-500">
+                      This field is required
+                    </span>
+                  )}
+                </div>
+              </div>
+              {/* password */}
+              <div className="mt-5 space-y-2">
+                <span>Password</span>
+                <br />
+                <div className="flex gap-3">
+                  <input
+                    type="password"
+                    className="p-2 rounded-md w-full my-2 bg-white dark:bg-gray-800 text-black dark:text-white outline-none dark:placeholder:text-white placeholder:text-black  dark:border-white border-black border"
+                    placeholder="Enter your password"
+                    {...register("password", {
+                      required: true,
+                      errors: "This field is required",
+                    })}
+                  />
+                  {errors.password && (
+                    <span className="text-pink-500">
+                      This field is required
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-around mt-6 items-center">
+                <button
+                  type="submit"
+                  className="bg-pink-500 py-2 px-3 rounded-md text-black"
+                >
+                  Login
+                </button>
+                <p>
+                  Not registered?{" "}
+                  <span className="text-blue-500 underline cursor-pointer">
+                    <Link to="/Signup">Signup</Link>
+                  </span>
+                </p>
+              </div>
+            </form>
           </div>
-
-          {/* Password */}
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your password"
-            />
-          </div>
-
-          {/* Error Message */}
-          {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-
-          {/* Submit Button */}
-          <div>
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Log In
-            </button>
-          </div>
-        </form>
+        </dialog>
       </div>
     </div>
   );

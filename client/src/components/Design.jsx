@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 
 const Design = () => {
@@ -34,23 +34,23 @@ const Design = () => {
       const imageUrl = URL.createObjectURL(response.data);
       setImageUrl(imageUrl); // Set the generated image URL
     } catch (err) {
-      setError("Failed to generate image. Please try again later.");
+      setError("Failed to generate image. Please try again later." + err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="md:mt-96 lg:mt-96 xl:96 mt-40 mb-56 max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-3xl font-semibold text-center text-blue-600 mb-6">
+    <div className="mt-16 mb-32 max-w-4xl mx-auto p-8 bg-gradient-to-r from-gray-100 to-white rounded-3xl shadow-xl transition-all">
+      <h1 className="text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-500 mb-8">
         Design Generator
       </h1>
 
-      <form onSubmit={handleGenerateImage} className="space-y-4">
+      <form onSubmit={handleGenerateImage} className="space-y-6">
         <div>
           <label
             htmlFor="prompt"
-            className="block text-lg font-medium text-gray-700"
+            className="block text-lg font-semibold text-gray-700"
           >
             Enter your prompt:
           </label>
@@ -60,16 +60,16 @@ const Design = () => {
             value={prompt}
             onChange={handleInputChange}
             placeholder="e.g., A futuristic city landscape"
-            className="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="mt-3 w-full p-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all placeholder-gray-500"
           />
         </div>
 
-        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <div className="flex justify-center">
           <button
             type="submit"
-            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+            className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-all disabled:bg-gray-400"
             disabled={loading}
           >
             {loading ? "Generating..." : "Generate Design"}
@@ -79,20 +79,20 @@ const Design = () => {
 
       {loading && (
         <div className="mt-6 flex justify-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
 
       {imageUrl && !loading && (
-        <div className="mt-8">
-          <h2 className="text-xl font-medium text-center text-gray-800">
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold text-center text-gray-800 mb-6">
             Generated Design
           </h2>
-          <div className="flex justify-center mt-4">
+          <div className="flex justify-center">
             <img
               src={imageUrl}
               alt="Generated Design"
-              className="max-w-full h-auto rounded-lg shadow-lg"
+              className="w-1/2 h-auto rounded-2xl shadow-xl"
             />
           </div>
         </div>

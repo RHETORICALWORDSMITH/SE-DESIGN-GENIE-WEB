@@ -19,6 +19,7 @@ const URI = process.env.MONGODB_URI;
 //connect to mongodb
 const mongooseConnect = async () => {
   try {
+    console.log("connecting to mongodb:")
     await mongoose.connect(`${URI}DesignGenie`);
     console.log("Connected: " + mongoose.connection.host);
   } catch (e) {
